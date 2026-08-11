@@ -1,0 +1,10 @@
+Flask
+gunicorn
+pandas
+numpy
+yfinance
+scikit-learn
+xgboost
+joblib
+streamlit
+requests
