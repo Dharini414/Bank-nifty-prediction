@@ -935,22 +935,22 @@ if "prediction" in st.session_state:
     # -----------------------------------------------------
 
     st.markdown(
-        f"""
+            f"""
         <div class="info-card">
-            <p>
-                <strong>Prediction:</strong>
-                {predicted_return * 100:.4f}% &nbsp; • &nbsp;
-
-                <strong>BUY threshold:</strong>
-                {buy_threshold * 100:.4f}% &nbsp; • &nbsp;
-
-                <strong>SELL threshold:</strong>
-                {sell_threshold * 100:.4f}%
-            </p>
+        <p style="color:#1e40af !important; margin:0;">
+        <strong style="color:#1e40af !important;">Prediction:</strong>
+        {predicted_return * 100:.4f}%
+        &nbsp;&nbsp;•&nbsp;&nbsp;
+        <strong style="color:#1e40af !important;">BUY threshold:</strong>
+        {buy_threshold * 100:.4f}%
+        &nbsp;&nbsp;•&nbsp;&nbsp;
+        <strong style="color:#1e40af !important;">SELL threshold:</strong>
+        {sell_threshold * 100:.4f}%
+        </p>
         </div>
         """,
-        unsafe_allow_html=True
-    )
+            unsafe_allow_html=True
+        )
 
 
 # =========================================================
