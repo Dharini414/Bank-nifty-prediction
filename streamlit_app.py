@@ -3,6 +3,7 @@ import pandas as pd
 import requests
 import matplotlib.pyplot as plt
 
+
 # =========================================================
 # PAGE CONFIG
 # =========================================================
@@ -14,137 +15,161 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+
 # =========================================================
-# CONFIGURATION
+# API CONFIGURATION
 # =========================================================
 
-API_URL = "https://bank-nifty-prediction.onrender.compredict"
+# Replace this with your actual Render API URL
+API_URL = "https://bank-nifty-prediction.onrender.com/predict"
+
 
 # =========================================================
 # CUSTOM CSS
 # =========================================================
 
-st.markdown("""
-<style>
+st.markdown(
+    """
+    <style>
 
-    /* Main background */
+    /* =====================================================
+       MAIN APPLICATION
+       ===================================================== */
+
     .stApp {
         background-color: #f8fafc;
     }
 
-    /* Main content */
     .block-container {
+        max-width: 1400px;
         padding-top: 2rem;
         padding-bottom: 3rem;
-        max-width: 1400px;
     }
 
-    /* Header */
-    .dashboard-header {
-        background: white;
-        padding: 25px 30px;
-        border-radius: 16px;
-        border: 1px solid #e2e8f0;
-        margin-bottom: 25px;
+
+    /* =====================================================
+       SIDEBAR
+       ===================================================== */
+
+    section[data-testid="stSidebar"] {
+        background-color: #ffffff !important;
+        border-right: 1px solid #e2e8f0;
     }
 
-    .dashboard-title {
-        font-size: 32px;
-        font-weight: 700;
-        color: #0f172a;
-        margin-bottom: 5px;
+    /* Force all sidebar text to dark */
+    section[data-testid="stSidebar"] * {
+        color: #1e293b !important;
     }
 
-    .dashboard-subtitle {
-        color: #64748b;
-        font-size: 15px;
+    /* Sidebar headings */
+    section[data-testid="stSidebar"] h1,
+    section[data-testid="stSidebar"] h2,
+    section[data-testid="stSidebar"] h3,
+    section[data-testid="stSidebar"] h4 {
+        color: #0f172a !important;
     }
 
-    /* Section headers */
-    .section-title {
-        font-size: 21px;
-        font-weight: 650;
-        color: #0f172a;
-        margin-top: 25px;
-        margin-bottom: 12px;
+    /* Sidebar normal text */
+    section[data-testid="stSidebar"] p,
+    section[data-testid="stSidebar"] span,
+    section[data-testid="stSidebar"] label {
+        color: #334155 !important;
     }
 
-    /* Metric cards */
+    /* Sidebar captions */
+    section[data-testid="stSidebar"] small {
+        color: #64748b !important;
+    }
+
+    /* Sidebar warning */
+    section[data-testid="stSidebar"]
+    [data-testid="stAlert"] {
+        background-color: #fffbeb !important;
+        border-radius: 10px;
+        border: 1px solid #fde68a;
+    }
+
+    section[data-testid="stSidebar"]
+    [data-testid="stAlert"] * {
+        color: #92400e !important;
+    }
+
+
+    /* =====================================================
+       METRIC CARDS
+       ===================================================== */
+
     [data-testid="stMetric"] {
-        background-color: white;
+        background-color: #ffffff;
         border: 1px solid #e2e8f0;
         border-radius: 14px;
         padding: 18px;
-        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
     }
 
     [data-testid="stMetricLabel"] {
-        color: #64748b;
+        color: #64748b !important;
     }
 
     [data-testid="stMetricValue"] {
-        color: #0f172a;
+        color: #0f172a !important;
         font-weight: 700;
     }
 
-    /* Buttons */
+
+    /* =====================================================
+       BUTTONS
+       ===================================================== */
+
     .stButton > button {
         width: 100%;
+        min-height: 48px;
         border-radius: 10px;
         border: none;
-        padding: 12px 20px;
+        background-color: #0f172a;
+        color: white !important;
         font-weight: 600;
         font-size: 15px;
-        background-color: #0f172a;
-        color: white;
     }
 
     .stButton > button:hover {
         background-color: #1e293b;
-        color: white;
+        color: white !important;
     }
 
-    /* Dataframe */
+
+    /* =====================================================
+       DATAFRAME
+       ===================================================== */
+
     [data-testid="stDataFrame"] {
         border-radius: 12px;
         overflow: hidden;
     }
 
-    /* Sidebar */
-    section[data-testid="stSidebar"] {
-        background-color: white;
-        border-right: 1px solid #e2e8f0;
-    }
 
-    /* Small status card */
-    .status-card {
-        background: white;
-        border: 1px solid #e2e8f0;
-        border-radius: 14px;
-        padding: 18px;
-        margin-top: 15px;
-    }
+    /* =====================================================
+       FOOTER
+       ===================================================== */
 
-    .status-label {
+    .footer {
+        text-align: center;
         color: #64748b;
         font-size: 13px;
+        padding-top: 20px;
     }
 
-    .status-value {
-        color: #0f172a;
-        font-size: 16px;
-        font-weight: 600;
-        margin-top: 4px;
-    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
-</style>
-""", unsafe_allow_html=True)
 
 # =========================================================
 # LOAD DATA
 # =========================================================
 
-@st.cache_data
+@st.cache_data(ttl=3600)
 def load_data():
 
     df = pd.read_csv(
@@ -159,11 +184,15 @@ def load_data():
 
 
 try:
+
     df = load_data()
 
 except Exception as e:
 
-    st.error(f"Unable to load market data: {e}")
+    st.error(
+        f"Unable to load market data: {e}"
+    )
+
     st.stop()
 
 
@@ -171,20 +200,14 @@ except Exception as e:
 # HEADER
 # =========================================================
 
-st.markdown("""
-<div class="dashboard-header">
+st.title("📈 BankNifty Prediction Dashboard")
 
-    <div class="dashboard-title">
-        📈 BankNifty Prediction Dashboard
-    </div>
+st.caption(
+    "Machine Learning powered market signal analysis "
+    "using technical indicators and XGBoost."
+)
 
-    <div class="dashboard-subtitle">
-        Machine Learning powered market signal analysis
-        using technical indicators and XGBoost.
-    </div>
-
-</div>
-""", unsafe_allow_html=True)
+st.divider()
 
 
 # =========================================================
@@ -193,55 +216,62 @@ st.markdown("""
 
 with st.sidebar:
 
-    st.markdown("## ⚙️ Dashboard")
+    st.header("⚙️ Dashboard")
 
-    st.markdown("---")
+    st.divider()
 
-    st.markdown("### 📊 Data Information")
+    st.subheader("📊 Data Information")
 
     latest_date = df["Date"].max()
 
     st.write(
-        f"**Latest Data:**  "
+        f"**Latest Data:** "
         f"{latest_date.strftime('%d %b %Y')}"
     )
 
     st.write(
-        f"**Total Records:**  "
+        f"**Total Records:** "
         f"{len(df):,}"
     )
 
-    st.markdown("---")
+    st.divider()
 
-    st.markdown("### 🤖 Model")
+    st.subheader("🤖 Model Information")
 
     st.write("**Model:** XGBoost")
 
-    st.write("**Prediction:** Next Trading Day")
+    st.write(
+        "**Prediction:** Next Trading Day"
+    )
 
-    st.write("**Signals:** BUY / HOLD / SELL")
+    st.write(
+        "**Signals:** BUY / HOLD / SELL"
+    )
 
-    st.markdown("---")
+    st.divider()
 
-    st.caption(
-        "⚠️ This dashboard is for educational "
-        "and analytical purposes only."
+    st.warning(
+        "This dashboard is for educational and "
+        "analytical purposes only."
     )
 
 
 # =========================================================
-# TOP MARKET STATISTICS
+# LATEST MARKET DATA
 # =========================================================
 
 latest_row = df.iloc[-1]
 
 current_price = latest_row["Close"]
 
-previous_price = (
-    df.iloc[-2]["Close"]
-    if len(df) > 1
-    else current_price
-)
+if len(df) > 1:
+
+    previous_price = df.iloc[-2]["Close"]
+
+else:
+
+    previous_price = current_price
+
 
 daily_change = (
     (current_price - previous_price)
@@ -249,7 +279,14 @@ daily_change = (
 ) * 100
 
 
+# =========================================================
+# MARKET OVERVIEW
+# =========================================================
+
+st.subheader("📊 Current Market Overview")
+
 col1, col2, col3, col4 = st.columns(4)
+
 
 with col1:
 
@@ -259,6 +296,7 @@ with col1:
         f"{daily_change:+.2f}%"
     )
 
+
 with col2:
 
     st.metric(
@@ -266,12 +304,14 @@ with col2:
         f"{latest_row['RSI']:.2f}"
     )
 
+
 with col3:
 
     st.metric(
         "Momentum",
         f"{latest_row['Momentum']:,.2f}"
     )
+
 
 with col4:
 
@@ -285,80 +325,78 @@ with col4:
 # PREDICTION SECTION
 # =========================================================
 
-st.markdown(
-    '<div class="section-title">🤖 Next Trading Day Prediction</div>',
-    unsafe_allow_html=True
-)
+st.subheader("🤖 Next Trading Day Prediction")
 
-prediction_col, info_col = st.columns([1.5, 1])
 
-with prediction_col:
+if st.button(
+    "🔮 Predict Next Trading Day",
+    width="stretch"
+):
 
-    if st.button(
-        "🔮 Predict Next Trading Day",
-        use_container_width=True
+    with st.spinner(
+        "Connecting to prediction model..."
     ):
 
-        with st.spinner("Connecting to prediction model..."):
+        try:
 
-            try:
+            response = requests.get(
+                API_URL,
+                timeout=120
+            )
 
-                response = requests.get(
-                    API_URL,
-                    timeout=120
-                )
+            if response.status_code == 200:
 
-                if response.status_code == 200:
+                result = response.json()
 
-                    result = response.json()
+                st.session_state[
+                    "prediction"
+                ] = result
 
-                    prediction_date = result[
-                        "prediction_date"
-                    ]
+            else:
 
-                    predicted_return = result[
-                        "predicted_return"
-                    ]
+                try:
 
-                    signal = result["signal"]
-
-                    buy_threshold = result[
-                        "buy_threshold"
-                    ]
-
-                    sell_threshold = result[
-                        "sell_threshold"
-                    ]
-
-                    st.session_state["prediction"] = result
-
-                else:
-
-                    try:
-                        error_message = response.json().get(
+                    error_message = (
+                        response.json().get(
                             "error",
                             "Prediction failed"
                         )
+                    )
 
-                    except Exception:
-                        error_message = (
-                            "Prediction API returned an error."
-                        )
+                except Exception:
 
-                    st.error(error_message)
+                    error_message = (
+                        f"Prediction API returned "
+                        f"status code "
+                        f"{response.status_code}"
+                    )
 
-            except requests.exceptions.Timeout:
+                st.error(error_message)
 
-                st.error(
-                    "Prediction API timed out. "
-                    "The free Render service may be waking up."
-                )
 
-            except requests.exceptions.RequestException as e:
+        except requests.exceptions.Timeout:
 
-                st.error(
-                    f"Could not connect to prediction API: {e}"
-                )
+            st.error(
+                "Prediction API timed out. "
+                "The free Render service may be "
+                "starting up. Please try again."
+            )
+
+
+        except requests.exceptions.ConnectionError:
+
+            st.error(
+                "Could not connect to the prediction API. "
+                "Please check that your Render service "
+                "is running."
+            )
+
+
+        except requests.exceptions.RequestException as e:
+
+            st.error(
+                f"API request failed: {e}"
+            )
 
 
 # =========================================================
@@ -369,19 +407,40 @@ if "prediction" in st.session_state:
 
     result = st.session_state["prediction"]
 
-    prediction_date = result["prediction_date"]
-    predicted_return = result["predicted_return"]
-    signal = result["signal"]
-    buy_threshold = result["buy_threshold"]
-    sell_threshold = result["sell_threshold"]
+    prediction_date = result[
+        "prediction_date"
+    ]
 
-    st.markdown("---")
+    predicted_return = result[
+        "predicted_return"
+    ]
+
+    signal = result[
+        "signal"
+    ]
+
+    buy_threshold = result[
+        "buy_threshold"
+    ]
+
+    sell_threshold = result[
+        "sell_threshold"
+    ]
+
+
+    st.divider()
 
     st.subheader(
-        f"Prediction for {prediction_date}"
+        f"🎯 Prediction for {prediction_date}"
     )
 
+
+    # -----------------------------------------------------
+    # Prediction metrics
+    # -----------------------------------------------------
+
     col1, col2, col3 = st.columns(3)
+
 
     with col1:
 
@@ -390,12 +449,14 @@ if "prediction" in st.session_state:
             f"{predicted_return * 100:.4f}%"
         )
 
+
     with col2:
 
         st.metric(
             "BUY Threshold",
             f"{buy_threshold * 100:.4f}%"
         )
+
 
     with col3:
 
@@ -404,7 +465,13 @@ if "prediction" in st.session_state:
             f"{sell_threshold * 100:.4f}%"
         )
 
-    # Signal
+
+    # -----------------------------------------------------
+    # Trading Signal
+    # -----------------------------------------------------
+
+    st.subheader("📌 Trading Signal")
+
 
     if signal == "BUY":
 
@@ -412,11 +479,23 @@ if "prediction" in st.session_state:
             "🟢 BUY SIGNAL"
         )
 
+        st.info(
+            "The predicted return is above the "
+            "historical BUY threshold."
+        )
+
+
     elif signal == "SELL":
 
         st.error(
             "🔴 SELL SIGNAL"
         )
+
+        st.info(
+            "The predicted return is below the "
+            "historical SELL threshold."
+        )
+
 
     else:
 
@@ -424,27 +503,9 @@ if "prediction" in st.session_state:
             "🟡 HOLD SIGNAL"
         )
 
-    # Explanation
-
-    if signal == "BUY":
-
         st.info(
-            "The predicted return is above the historical "
-            "BUY threshold."
-        )
-
-    elif signal == "SELL":
-
-        st.info(
-            "The predicted return is below the historical "
-            "SELL threshold."
-        )
-
-    else:
-
-        st.info(
-            "The predicted return is between the BUY and "
-            "SELL thresholds."
+            "The predicted return is between the "
+            "BUY and SELL thresholds."
         )
 
 
@@ -452,16 +513,16 @@ if "prediction" in st.session_state:
 # MARKET TREND
 # =========================================================
 
-st.markdown(
-    '<div class="section-title">📈 Market Trend</div>',
-    unsafe_allow_html=True
-)
+st.subheader("📈 Market Trend")
+
 
 chart_df = df.tail(250)
+
 
 fig, ax = plt.subplots(
     figsize=(14, 5)
 )
+
 
 ax.plot(
     chart_df["Date"],
@@ -469,25 +530,33 @@ ax.plot(
     linewidth=1.8
 )
 
+
 ax.set_title(
-    "BankNifty Closing Price — Last 250 Trading Sessions",
+    "BankNifty Closing Price — "
+    "Last 250 Trading Sessions",
     fontsize=14,
     fontweight="bold"
 )
 
+
 ax.set_xlabel("Date")
+
 ax.set_ylabel("Close Price")
+
 
 ax.grid(
     alpha=0.2
 )
 
+
 fig.autofmt_xdate()
+
 
 st.pyplot(
     fig,
-    use_container_width=True
+    width="stretch"
 )
+
 
 plt.close(fig)
 
@@ -496,12 +565,11 @@ plt.close(fig)
 # TECHNICAL INDICATORS
 # =========================================================
 
-st.markdown(
-    '<div class="section-title">📊 Technical Indicators</div>',
-    unsafe_allow_html=True
-)
+st.subheader("📊 Technical Indicators")
+
 
 col1, col2, col3, col4 = st.columns(4)
+
 
 with col1:
 
@@ -510,12 +578,14 @@ with col1:
         f"{latest_row['SMA_50']:,.2f}"
     )
 
+
 with col2:
 
     st.metric(
         "SMA 100",
         f"{latest_row['SMA_100']:,.2f}"
     )
+
 
 with col3:
 
@@ -524,22 +594,21 @@ with col3:
         f"{latest_row['MACD']:.4f}"
     )
 
+
 with col4:
 
     st.metric(
-        "Volatility 20D",
+        "20D Volatility",
         f"{latest_row['Volatility_20']:.4f}"
     )
 
 
 # =========================================================
-# LATEST MARKET DATA
+# LATEST MARKET DATA TABLE
 # =========================================================
 
-st.markdown(
-    '<div class="section-title">📋 Latest Market Data</div>',
-    unsafe_allow_html=True
-)
+st.subheader("📋 Latest Market Data")
+
 
 display_columns = [
     "Date",
@@ -553,18 +622,24 @@ display_columns = [
     "Momentum"
 ]
 
+
 available_columns = [
-    col for col in display_columns
-    if col in df.columns
+    column
+    for column in display_columns
+    if column in df.columns
 ]
 
-latest_data = df[
-    available_columns
-].tail(20).copy()
+
+latest_data = (
+    df[available_columns]
+    .tail(20)
+    .copy()
+)
+
 
 st.dataframe(
     latest_data,
-    use_container_width=True,
+    width="stretch",
     hide_index=True
 )
 
@@ -573,10 +648,15 @@ st.dataframe(
 # FOOTER
 # =========================================================
 
-st.markdown("---")
+st.divider()
 
-st.caption(
-    "BankNifty Signal Dashboard • "
-    "Data powered by Yahoo Finance • "
-    "Prediction powered by XGBoost"
+st.markdown(
+    """
+    <div class="footer">
+        BankNifty Signal Dashboard •
+        Data powered by Yahoo Finance •
+        Prediction powered by XGBoost
+    </div>
+    """,
+    unsafe_allow_html=True
 )
